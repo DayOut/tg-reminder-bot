@@ -13,10 +13,6 @@ bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
 chat_id = os.environ.get('TELEGRAM_CHAT_ID')
 events_json = os.environ.get('EVENTS')
 
-events = json.loads(events_json)
-
-bot = Bot(token=bot_token)
-
 # Асинхронна функція для відправлення повідомлення
 async def send_message(message):
     await bot.send_message(chat_id=chat_id, text=message)
@@ -38,4 +34,7 @@ async def main():
     await scheduler()
 
 if __name__ == '__main__':
+    events = json.loads(events_json)
+
+    bot = Bot(token=bot_token)
     asyncio.run(main())
