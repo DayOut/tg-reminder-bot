@@ -32,13 +32,20 @@ async def send_message(message, disable_notification=False):
     logging.info(f"Sent message: {message} with disable_notification={disable_notification}")
 
 
+def create_send_message_task(message, disable_notification=False):
+    return asyncio.create_task(send_message(message, disable_notification=disable_notification))
+
+
 # Налаштування розкладу нагадувань
 def schedule_tasks():
     for event in events:
         logging.info(f"Schedule message: {event['message']} at {event['timeUTC']}")
         schedule.every().day.at(event['timeUTC']).do(asyncio.create_task, send_message(event['message']))
+        schedule.every().day.at(event['timeUTC']).do(create_send_message_task, event['message'])
+
     # schedule.every().day.at(daily_report).do(asyncio.create_task, send_message('Daily Report\n' + get_scheduled_tasks(), disable_notification=True))
-    schedule.every().minute.do(asyncio.create_task, send_message('Daily Report\n' + get_scheduled_tasks(), disable_notification=True))
+    # schedule.every().minute.do(asyncio.create_task, send_message('Daily Report\n' + get_scheduled_tasks(), disable_notification=True))
+    schedule.every().minute.do(create_send_message_task, 'Daily Report\n' + get_scheduled_tasks(), disable_notification=True)
     # schedule.every().minute.do(asyncio.create_task, send_message("testssss", disable_notification=True))
 
 def get_scheduled_tasks() -> str:
