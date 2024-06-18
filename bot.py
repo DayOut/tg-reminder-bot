@@ -2,10 +2,11 @@ import json
 import logging
 import asyncio
 from datetime import datetime, time
-from telegram import Bot
+from telegram import Bot, Update
+from telegram.error import Forbidden, NetworkError
 import schedule
 import os
-from pytz import timezone, utc
+from typing import NoReturn
 
 # Налаштування логування
 logging.basicConfig(format='%(asctime)s - %(name)s -%(message)s', level=logging.INFO)
@@ -23,35 +24,72 @@ bot = Bot(token=bot_token)
 
 # Асинхронна функція для відправлення повідомлення
 async def send_message(message, disable_notification=False):
-    await bot.send_message(chat_id=chat_id, text=message, disable_notification=disable_notification)
+    await bot.send_message(chat_id=chat_id, text=message, disable_notification=disable_notification, parse_mode='MarkdownV2')
     logging.info(f"Sent message: {message} with disable_notification={disable_notification}")
 
 
 # Налаштування розкладу нагадувань
 def schedule_tasks() -> str:
-    message = 'Events processed: \n'
+    message = '>Events processed: \n> \n'
     for event in events:
         # local_time = convert_time_to_local(event['time'], tz)
         schedule.every().day.at(event['timeUTC']).do(asyncio.create_task, send_message(event['message']))
-        message += f'`time: {event["timeUTC"]}(+3:00) - {event['message']}`\n'
+        message += f'>`time: {event["timeUTC"]}(+3:00) \- {event['message']}`\n'
     return message
 
 
 async def scheduler():
-    while True:
-        schedule.run_pending()
-        await asyncio.sleep(1)
+    async with Bot(bot_token) as bot_listener:
+        # get the first pending update_id, this is so we can skip over it in case
+        # we get a "Forbidden" exception.
+        try:
+            update_id = (await bot_listener.get_updates())[0].update_id
+        except IndexError:
+            update_id = None
+
+        logging.info("listening for new messages...")
+        while True:
+            schedule.run_pending()
+            try:
+                update_id = await echo(bot_listener, update_id)
+            except NetworkError:
+                await asyncio.sleep(1)
+            except Forbidden:
+                # The user has removed or blocked the bot.
+                update_id += 1
+            await asyncio.sleep(1)
+
 
 
 # Основна функція
 async def main():
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    start_message = f"Програма запущена! Нагадування активні. Поточний час: {current_time}"
-    start_message += schedule_tasks()
+    current_time = datetime.now().strftime("%Y\-%m\-%d %H:%M:%S")
+    start_message = f"Бот онлайн\! \nПоточний час: `{current_time}`"
+    start_message += "\n\n" + schedule_tasks()
 
     await send_message(start_message, disable_notification=True)
 
     await scheduler()
+
+
+async def echo(bot: Bot, update_id: int) -> int:
+    """Echo the message the user sent."""
+    # Request updates after the last update_id
+    updates = await bot.get_updates(offset=update_id, timeout=10, allowed_updates=Update.ALL_TYPES)
+    for update in updates:
+        next_update_id = update.update_id + 1
+
+        # your bot can receive updates without messages
+        # and not all messages contain text
+        if update.message and update.message.text:
+            if update.message.text == '/chat_id':
+                await update.message.reply_text(str(update.message.chat_id))
+            else:
+                # Reply to the message
+                logging.info("Found message %s!", update.message.text)
+                await update.message.reply_text(update.message.text)
+        return next_update_id
+    return update_id
 
 
 if __name__ == '__main__':
