@@ -41,13 +41,13 @@ def get_scheduled_tasks() -> str:
     for event in events:
         hours, minutes = event['timeUTC'].split(':')
         # local_time = convert_time_to_local(event['time'], tz)
-        message += f'>`time: {hours + time_delta}:{minutes} (UTC: {event['timeUTC']}) \- {event['message']}`\n'
+        message += f'>`time: {int(hours) + int(time_delta)}:{minutes} (UTC: {event['timeUTC']}) \- {event['message']}`\n'
     hours, minutes = daily_report.split(':')
-    message += f'>`time: {hours + time_delta}:{minutes} (UTC: {daily_report}) \- Daily report`\n'
+    message += f'>`time: {int(hours) + int(time_delta)}:{minutes} (UTC: {daily_report}) \- Daily report`\n'
 
     message += '> joblist:'
     for job in schedule.get_jobs():
-        message += f'`>{job.hour}:{job.minute} - `\n'
+        message += f'`>{repr(job)} - `\n'
     return message
 
 async def scheduler():
