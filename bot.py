@@ -28,14 +28,13 @@ async def send_message(message, disable_notification=False):
 
 
 # Налаштування розкладу нагадувань
-async def schedule_tasks():
-    # tz = timezone(local_timezone)
+def schedule_tasks() -> str:
     message = 'Events processed: \n'
     for event in events:
         # local_time = convert_time_to_local(event['time'], tz)
         schedule.every().day.at(event['timeUTC']).do(asyncio.create_task, send_message(event['message']))
-        message += f'local: {event['timeUTC']} - config: {event["timeUTC"]} - {event['message']}\n'
-    await send_message(message, disable_notification=True)
+        message += f'`time: {event["timeUTC"]}(+3:00) - {event['message']}`\n'
+    return message
 
 
 async def scheduler():
@@ -46,15 +45,12 @@ async def scheduler():
 
 # Основна функція
 async def main():
-    # Отримання поточної дати та часу з врахуванням часового поясу
-    # tz = timezone(local_timezone)
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    start_message = f"Програма запущена! Нагадування активні. Поточний час: {current_time}"
+    start_message += schedule_tasks()
 
-    # Відправлення повідомлення при старті програми без сповіщення
-    await send_message(f"Програма запущена! Нагадування активні. Поточний час: {current_time}",
-                       disable_notification=True)
+    await send_message(start_message, disable_notification=True)
 
-    await schedule_tasks()
     await scheduler()
 
 
