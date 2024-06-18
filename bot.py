@@ -15,7 +15,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s -%(message)s', level=logging.
 bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '7282102903:AAF6Wp4H-kuAho8oPZblM9_PD9W7XVx6EkA')
 chat_id = os.environ.get('TELEGRAM_CHAT_ID', '294086745')
 events_json = os.environ.get('EVENTS', '[{"message": "Випити Animal Flex)", "timeUTC": "12:00"},{"message": "TEST", "timeUTC": "11:30"}]')
-daily_report = os.environ.get('DAILY_REPORT', '12:08')
+daily_report = os.environ.get('DAILY_REPORT', '12:20')
 # local_timezone = os.environ.get('LOCAL_TIMEZONE', 'Europe/Kiev')  # Задання часового поясу за замовчуванням
 
 # Завантаження та парсинг подій
@@ -91,9 +91,9 @@ async def echo(bot: Bot, update_id: int) -> int:
         # and not all messages contain text
         if update.message and update.message.text:
             if update.message.text == '/chat_id':
-                await update.message.reply_text(str(update.message.chat_id))
+                await update.message.reply_text(f"```{str(update.message.chat_id)}```", parse_mode='MarkdownV2')
             if update.message.text == '/stats':
-                await update.message.reply_text(get_scheduled_tasks())
+                await update.message.reply_text(get_scheduled_tasks(), parse_mode='MarkdownV2')
             # else:
             #     # Reply to the message
             #     logging.info("Found message %s!", update.message.text)
