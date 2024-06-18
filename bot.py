@@ -42,8 +42,9 @@ def get_scheduled_tasks() -> str:
         message += f'>`time: {event["timeUTC"]}(+3:00) \- {event['message']}`\n'
     message += f'>`time: {daily_report}(+3:00) \- Daily report`\n'
 
+    message += '> joblist:'
     for job in schedule.get_jobs():
-        message += f'`{job}`\n'
+        message += f'`>{job}`\n'
     return message
 
 async def scheduler():
@@ -73,7 +74,7 @@ async def main():
     current_time = datetime.now().strftime("%Y\-%m\-%d %H:%M:%S")
     start_message = f"Бот онлайн\! \nПоточний час: `{current_time}`"
     start_message += "\n\n" + get_scheduled_tasks()
-
+    schedule_tasks()
     await send_message(start_message, disable_notification=True)
 
     await scheduler()
