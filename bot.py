@@ -32,11 +32,11 @@ def create_send_message_task(message, disable_notification=False):
 def create_job(type:str, at:str, message:str, disable_notification:bool=False) -> NoReturn:
     job = schedule.every()
     if type == 'hourly':
-        job = job.hour
+        job = job.hours
     elif type == 'daily':
-        job = job.day
+        job = job.days
     elif type == 'weekly':
-        job = job.week
+        job = job.weeks
 
     job.at(at).do(create_send_message_task, message, disable_notification)
 
