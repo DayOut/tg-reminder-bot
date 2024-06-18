@@ -15,7 +15,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s -%(message)s', level=logging.
 bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '7282102903:AAF6Wp4H-kuAho8oPZblM9_PD9W7XVx6EkA')
 chat_id = os.environ.get('TELEGRAM_CHAT_ID', '294086745')
 events_json = os.environ.get('EVENTS', '[{"message": "Випити Animal Flex)", "timeUTC": "12:00"},{"message": "TEST", "timeUTC": "11:30"}]')
-daily_report = os.environ.get('DAILY_REPORT', '13:22')
+daily_report = os.environ.get('DAILY_REPORT', '11:00')
 time_delta = os.environ.get('TIME_DELTA', '3')
 # local_timezone = os.environ.get('LOCAL_TIMEZONE', 'Europe/Kiev')  # Задання часового поясу за замовчуванням
 
@@ -41,8 +41,8 @@ def schedule_tasks():
     for event in events:
         logging.info(f"Schedule message: {event['message']} at {event['timeUTC']}")
         schedule.every().day.at(event['timeUTC']).do(create_send_message_task, event['message'])
-    schedule.every().hour.at(':50').do(create_send_message_task, 'Hourly Report\n' + get_scheduled_tasks(), disable_notification=True)
-    schedule.every().day.at(daily_report).do(create_send_message_task, 'Hourly Report\n' + get_scheduled_tasks(),
+    # schedule.every().hour.at(':50').do(create_send_message_task, 'Hourly Report\n' + get_scheduled_tasks(), disable_notification=True)
+    schedule.every().day.at(daily_report).do(create_send_message_task, 'Daily Report\n' + get_scheduled_tasks(),
                                        disable_notification=True)
 
 
@@ -60,26 +60,28 @@ def get_scheduled_tasks() -> str:
     #     message += f'> {str(job.next_run.strftime('%H:%M:%S'))}\n'
     return message
 
-async def scheduler():
-    async with Bot(bot_token) as bot_listener:
-        # get the first pending update_id, this is so we can skip over it in case
-        # we get a "Forbidden" exception.
-        try:
-            update_id = (await bot_listener.get_updates())[0].update_id
-        except IndexError:
-            update_id = None
 
-        logging.info("listening for new messages...")
-        while True:
-            schedule.run_pending()
-            try:
-                update_id = await echo(bot_listener, update_id)
-            except NetworkError:
-                await asyncio.sleep(1)
-            except Forbidden:
-                # The user has removed or blocked the bot.
-                update_id += 1
+async def scheduler():
+    try:
+        update_id = (await bot.get_updates())[0].update_id
+    except IndexError:
+        update_id = None
+
+    logging.info("listening for new messages...")
+    while True:
+        schedule.run_pending()
+        try:
+            update_id = await echo(bot, update_id)
+        except NetworkError:
             await asyncio.sleep(1)
+        except Forbidden:
+            # The user has removed or blocked the bot.
+            update_id += 1
+        await asyncio.sleep(1)
+    # async with Bot(bot_token) as bot_listener:
+    #     # get the first pending update_id, this is so we can skip over it in case
+    #     # we get a "Forbidden" exception.
+
 
 
 # Основна функція
@@ -109,10 +111,6 @@ async def echo(bot: Bot, update_id: int) -> int:
                 message = f"Поточний час: ```{current_time}```\n"
                 message += get_scheduled_tasks()
                 await update.message.reply_text(message, parse_mode='MarkdownV2')
-            # else:
-            #     # Reply to the message
-            #     logging.info("Found message %s!", update.message.text)
-            #     await update.message.reply_text(update.message.text)
         return next_update_id
     return update_id
 
