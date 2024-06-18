@@ -41,6 +41,9 @@ def get_scheduled_tasks() -> str:
         # local_time = convert_time_to_local(event['time'], tz)
         message += f'>`time: {event["timeUTC"]}(+3:00) \- {event['message']}`\n'
     message += f'>`time: {daily_report}(+3:00) \- Daily report`\n'
+
+    for job in schedule.get_jobs():
+        message += f'`{job}`\n'
     return message
 
 async def scheduler():
@@ -88,6 +91,8 @@ async def echo(bot: Bot, update_id: int) -> int:
         if update.message and update.message.text:
             if update.message.text == '/chat_id':
                 await update.message.reply_text(str(update.message.chat_id))
+            if update.message.text == '/stats':
+                await update.message.reply_text(get_scheduled_tasks())
             # else:
             #     # Reply to the message
             #     logging.info("Found message %s!", update.message.text)
