@@ -45,7 +45,7 @@ def create_job(type:str, at:str, message:str, disable_notification:bool=False) -
 def schedule_tasks():
     for event in events:
         logging.info(f"Schedule message: {event['message']} at {event['timeUTC']}")
-        create_job(event['type'], event['at'], event['message'])
+        create_job(event['type'], event['timeUTC'], event['message'])
     create_job(daily_report, daily_report, 'Daily Report\n' + get_scheduled_tasks(), True)
 
 
