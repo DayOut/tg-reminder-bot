@@ -34,7 +34,7 @@ async def schedule_tasks():
     for event in events:
         # local_time = convert_time_to_local(event['time'], tz)
         schedule.every().day.at(event['timeUTC']).do(asyncio.create_task, send_message(event['message']))
-        message += f'local: {event['timeUTC']} - config: {event["time"]} - {event['message']}\n'
+        message += f'local: {event['timeUTC']} - config: {event["timeUTC"]} - {event['message']}\n'
     await send_message(message, disable_notification=True)
 
 
