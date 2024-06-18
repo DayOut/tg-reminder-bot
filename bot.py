@@ -38,7 +38,8 @@ async def send_message(message, disable_notification=False):
 async def schedule_tasks():
     tz = timezone(local_timezone)
     for event in events:
-        local_time = convert_time_to_local(event['time'], tz)
+        # local_time = convert_time_to_local(event['time'], tz)
+        local_time = event['time']
         schedule.every().day.at(local_time).do(asyncio.create_task, send_message(event['message']))
         await send_message(f"Задано нагадування {event['message']} на час {local_time}",
                            disable_notification=True)
