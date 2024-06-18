@@ -16,7 +16,7 @@ events_json = os.environ.get('EVENTS')
 
 # Асинхронна функція для відправлення повідомлення
 async def send_message(message):
-    await bot.send_message(chat_id=chat_id, text=message)
+    await bot.send_message(chat_id=chat_id, text=message, disable_notification=True)
     logging.info(f"Sent message: {message}")
 
 
