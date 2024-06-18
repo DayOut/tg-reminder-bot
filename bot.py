@@ -29,30 +29,22 @@ async def send_message(message, disable_notification=False):
 def create_send_message_task(message, disable_notification=False):
     return asyncio.create_task(send_message(message, disable_notification=disable_notification))
 
-def create_job(type:str, at:str, message:str, disable_notification:bool=False) -> NoReturn:
-    job = schedule.every()
-    if type == 'hourly':
-        job = job.hours
-    elif type == 'daily':
-        job = job.days
-    elif type == 'weekly':
-        job = job.weeks
-
-    job.at(at).do(create_send_message_task, message, disable_notification)
-
 
 # Налаштування розкладу нагадувань
 def schedule_tasks():
     for event in events:
         logging.info(f"Schedule message: {event['message']} at {event['timeUTC']}")
-        create_job(event['type'], event['timeUTC'], event['message'])
-    create_job(daily_report, daily_report, 'Daily Report\n' + get_scheduled_tasks(), True)
+        schedule.every().day.at(event['timeUTC']).do(create_send_message_task, event['message'])
+    # schedule.every().hour.at(':50').do(create_send_message_task, 'Hourly Report\n' + get_scheduled_tasks(), disable_notification=True)
+    schedule.every().day.at(daily_report).do(create_send_message_task, 'Daily Report\n' + get_scheduled_tasks(),
+                                       disable_notification=True)
 
 
 def get_scheduled_tasks() -> str:
     message = '>Events processed: \n> \n'
     for event in events:
         hours, minutes = event['timeUTC'].split(':')
+        # local_time = convert_time_to_local(event['time'], tz)
         message += f'>`time: {int(hours) + int(time_delta)}:{minutes} \(UTC: {event['timeUTC']}\) \- {event['message']}`\n'
     hours, minutes = daily_report.split(':')
     message += f'>`time: {int(hours) + int(time_delta)}:{minutes} \(UTC: {daily_report}\) \- Daily report`\n'
