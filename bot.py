@@ -15,6 +15,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s -%(message)s', level=logging.
 bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '7282102903:AAF6Wp4H-kuAho8oPZblM9_PD9W7XVx6EkA')
 chat_id = os.environ.get('TELEGRAM_CHAT_ID', '294086745')
 events_json = os.environ.get('EVENTS', '[{"message": "Випити Animal Flex)", "timeUTC": "12:00"},{"message": "TEST", "timeUTC": "11:30"}]')
+daily_report = os.environ.get('DAILY_REPORT', '15:00')
 # local_timezone = os.environ.get('LOCAL_TIMEZONE', 'Europe/Kiev')  # Задання часового поясу за замовчуванням
 
 # Завантаження та парсинг подій
@@ -29,14 +30,17 @@ async def send_message(message, disable_notification=False):
 
 
 # Налаштування розкладу нагадувань
-def schedule_tasks() -> str:
+def schedule_tasks():
+    for event in events:
+        schedule.every().day.at(event['timeUTC']).do(asyncio.create_task, send_message(event['message']))
+    schedule.every().day.at(daily_report).do(asyncio.create_task, send_message('Daily Report' + get_scheduled_tasks(), disable_notification=True))
+
+def get_scheduled_tasks() -> str:
     message = '>Events processed: \n> \n'
     for event in events:
         # local_time = convert_time_to_local(event['time'], tz)
-        schedule.every().day.at(event['timeUTC']).do(asyncio.create_task, send_message(event['message']))
         message += f'>`time: {event["timeUTC"]}(+3:00) \- {event['message']}`\n'
     return message
-
 
 async def scheduler():
     async with Bot(bot_token) as bot_listener:
