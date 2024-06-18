@@ -40,6 +40,7 @@ def get_scheduled_tasks() -> str:
     for event in events:
         # local_time = convert_time_to_local(event['time'], tz)
         message += f'>`time: {event["timeUTC"]}(+3:00) \- {event['message']}`\n'
+    message += f'>`time: {daily_report}(+3:00) \- Daily report`\n'
     return message
 
 async def scheduler():
