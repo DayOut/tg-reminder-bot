@@ -15,7 +15,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s -%(message)s', level=logging.
 bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '7282102903:AAF6Wp4H-kuAho8oPZblM9_PD9W7XVx6EkA')
 chat_id = os.environ.get('TELEGRAM_CHAT_ID', '294086745')
 events_json = os.environ.get('EVENTS', '[{"message": "Випити Animal Flex)", "timeUTC": "12:00"},{"message": "TEST", "timeUTC": "11:30"}]')
-daily_report = os.environ.get('DAILY_REPORT', '15:05')
+daily_report = os.environ.get('DAILY_REPORT', '12:08')
 # local_timezone = os.environ.get('LOCAL_TIMEZONE', 'Europe/Kiev')  # Задання часового поясу за замовчуванням
 
 # Завантаження та парсинг подій
