@@ -1,0 +1,16 @@
+{
+    "token": "YOUR_TOKEN",
+    "chat_id": "CHAT_ID",
+    "events": [
+        {
+            "message": "Нагадування про зустріч о 10:00",
+            "time": "11:36",
+            "enable": true
+        },
+        {
+            "message": "Нагадування про обід о 13:00",
+            "time": "13:00",
+            "enable": true
+        }
+    ]
+}
