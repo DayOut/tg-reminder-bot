@@ -29,7 +29,7 @@ async def send_message(message, disable_notification=False):
 
 # Налаштування розкладу нагадувань
 async def schedule_tasks():
-    tz = timezone(local_timezone)
+    # tz = timezone(local_timezone)
     message = 'Events processed: \n'
     for event in events:
         # local_time = convert_time_to_local(event['time'], tz)
