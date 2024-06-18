@@ -64,12 +64,11 @@ async def scheduler():
             await asyncio.sleep(1)
 
 
-
 # Основна функція
 async def main():
     current_time = datetime.now().strftime("%Y\-%m\-%d %H:%M:%S")
     start_message = f"Бот онлайн\! \nПоточний час: `{current_time}`"
-    start_message += "\n\n" + schedule_tasks()
+    start_message += "\n\n" + get_scheduled_tasks()
 
     await send_message(start_message, disable_notification=True)
 
