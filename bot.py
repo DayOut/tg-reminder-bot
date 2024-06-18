@@ -76,8 +76,8 @@ async def scheduler():
 async def main():
     current_time = datetime.now().strftime("%Y\-%m\-%d %H:%M:%S")
     start_message = f"Бот онлайн\! \nПоточний час: `{current_time}`"
-    start_message += "\n\n" + get_scheduled_tasks()
     schedule_tasks()
+    start_message += "\n\n" + get_scheduled_tasks()
     await send_message(start_message, disable_notification=True)
 
     await scheduler()
@@ -96,7 +96,10 @@ async def echo(bot: Bot, update_id: int) -> int:
             if update.message.text == '/chat_id':
                 await update.message.reply_text(f"```{str(update.message.chat_id)}```", parse_mode='MarkdownV2')
             if update.message.text == '/stats':
-                await update.message.reply_text(get_scheduled_tasks(), parse_mode='MarkdownV2')
+                current_time = datetime.now().strftime("%Y\-%m\-%d %H:%M:%S")
+                message = f"Поточний час: ```{current_time}```\n"
+                message += get_scheduled_tasks()
+                await update.message.reply_text(message, parse_mode='MarkdownV2')
             # else:
             #     # Reply to the message
             #     logging.info("Found message %s!", update.message.text)
