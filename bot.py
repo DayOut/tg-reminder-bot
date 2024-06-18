@@ -1,20 +1,19 @@
 import json
 import logging
 import asyncio
-from datetime import datetime
 from telegram import Bot
 import schedule
+import os
 
 # Налаштування логування
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelень)-%(message)s', level=logging.INFO)
 
-# Читання конфігураційного файлу
-with open('cfg.json', 'r', encoding='utf-8') as file:
-    config = json.load(file)
+# Отримання змінних оточення
+bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+chat_id = os.environ.get('TELEGRAM_CHAT_ID')
+events_json = os.environ.get('EVENTS')
 
-bot_token = config['token']
-chat_id = config['chat_id']
-events = config['events']
+events = json.loads(events_json)
 
 bot = Bot(token=bot_token)
 
@@ -39,12 +38,4 @@ async def main():
     await scheduler()
 
 if __name__ == '__main__':
-    logging.info(f"Starting bot at {datetime.now()}")
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        logging.info(f"Closing bot at {datetime.now()}. Reason: keyboard interrupt")
-        exit()
-    except Exception as e:
-        logging.info(f"Closing bot at {datetime.now()}. Reason: {e}")
-        exit()
+    asyncio.run(main())
