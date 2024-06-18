@@ -28,6 +28,14 @@ def convert_time_to_local(event_time, tz):
     return event_time_local.strftime("%H:%M")
 
 
+def convert_time_to_utc(event_time, event_timezone):
+    tz_event = timezone(event_timezone)
+    event_datetime = datetime.strptime(event_time, "%H:%M")
+    event_datetime_tz = tz_event.localize(event_datetime)
+    event_datetime_utc = event_datetime_tz.astimezone(utc)
+    return event_datetime_utc.strftime("%H:%M")
+
+
 # Асинхронна функція для відправлення повідомлення
 async def send_message(message, disable_notification=False):
     await bot.send_message(chat_id=chat_id, text=message, disable_notification=disable_notification)
@@ -39,7 +47,7 @@ async def schedule_tasks():
     tz = timezone(local_timezone)
     for event in events:
         # local_time = convert_time_to_local(event['time'], tz)
-        local_time = event['time']
+        local_time = convert_time_to_utc(event['time'], tz)
         schedule.every().day.at(local_time).do(asyncio.create_task, send_message(event['message']))
         await send_message(f"Задано нагадування {event['message']} на час {local_time}",
                            disable_notification=True)
