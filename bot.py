@@ -8,12 +8,12 @@ import os
 from pytz import timezone, utc
 
 # Налаштування логування
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelень)-%(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s -%(message)s', level=logging.INFO)
 
 # Отримання змінних оточення
-bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
-chat_id = os.environ.get('TELEGRAM_CHAT_ID')
-events_json = os.environ.get('EVENTS')
+bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '7282102903:AAF6Wp4H-kuAho8oPZblM9_PD9W7XVx6EkA')
+chat_id = os.environ.get('TELEGRAM_CHAT_ID', '294086745')
+events_json = os.environ.get('EVENTS', '[{"message": "Випити Animal Flex)", "time": "14:00"},{"message": "TEST", "time": "13:00"}]')
 local_timezone = os.environ.get('LOCAL_TIMEZONE', 'Europe/Kiev')  # Задання часового поясу за замовчуванням
 
 # Завантаження та парсинг подій
@@ -47,7 +47,7 @@ async def schedule_tasks():
     tz = timezone(local_timezone)
     for event in events:
         # local_time = convert_time_to_local(event['time'], tz)
-        local_time = convert_time_to_utc(event['time'], tz)
+        local_time = convert_time_to_utc(event['time'], local_timezone)
         schedule.every().day.at(local_time).do(asyncio.create_task, send_message(event['message']))
         await send_message(f"Задано нагадування {event['message']} на час {local_time}",
                            disable_notification=True)
