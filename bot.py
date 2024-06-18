@@ -35,11 +35,13 @@ async def send_message(message, disable_notification=False):
 
 
 # Налаштування розкладу нагадувань
-def schedule_tasks():
+async def schedule_tasks():
     tz = timezone(local_timezone)
     for event in events:
         local_time = convert_time_to_local(event['time'], tz)
         schedule.every().day.at(local_time).do(asyncio.create_task, send_message(event['message']))
+        await send_message(f"Задано нагадування {event['message']} на час {local_time}",
+                           disable_notification=True)
 
 
 async def scheduler():
@@ -58,7 +60,7 @@ async def main():
     await send_message(f"Програма запущена! Нагадування активні. Поточний час: {current_time}",
                        disable_notification=True)
 
-    schedule_tasks()
+    await schedule_tasks()
     await scheduler()
 
 
