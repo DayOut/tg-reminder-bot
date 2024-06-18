@@ -27,6 +27,7 @@ bot = Bot(token=bot_token)
 # Асинхронна функція для відправлення повідомлення
 async def send_message(message, disable_notification=False):
     logging.info(f"Sending message: {message} with disable_notification={disable_notification}")
+    # await bot.send_message(chat_id=chat_id, text=message, disable_notification=disable_notification, parse_mode='MarkdownV2')
     await bot.send_message(chat_id=chat_id, text=message, disable_notification=disable_notification, parse_mode='MarkdownV2')
     logging.info(f"Sent message: {message} with disable_notification={disable_notification}")
 
@@ -47,7 +48,7 @@ def get_scheduled_tasks() -> str:
     hours, minutes = daily_report.split(':')
     message += f'>`time: {int(hours) + int(time_delta)}:{minutes} (UTC: {daily_report}) \- Daily report`\n'
 
-    message += '> joblist:'
+    message += '> joblist:\n'
     for job in schedule.get_jobs():
         message += f'`>{repr(job)} - `\n'
     return message
