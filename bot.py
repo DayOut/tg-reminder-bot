@@ -84,10 +84,10 @@ async def echo(bot: Bot, update_id: int) -> int:
         if update.message and update.message.text:
             if update.message.text == '/chat_id':
                 await update.message.reply_text(str(update.message.chat_id))
-            else:
-                # Reply to the message
-                logging.info("Found message %s!", update.message.text)
-                await update.message.reply_text(update.message.text)
+            # else:
+            #     # Reply to the message
+            #     logging.info("Found message %s!", update.message.text)
+            #     await update.message.reply_text(update.message.text)
         return next_update_id
     return update_id
 
