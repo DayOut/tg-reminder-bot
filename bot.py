@@ -5,19 +5,13 @@ from datetime import datetime, time
 from telegram import Bot, Update
 from telegram.error import Forbidden, NetworkError
 import schedule
+from variables import bot_token, chat_id, events_json, daily_report, time_delta
 import os
 from typing import NoReturn
 
 # Налаштування логування
 logging.basicConfig(format='%(asctime)s - %(name)s -%(message)s', level=logging.INFO)
 
-# Отримання змінних оточення
-bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '7282102903:AAF6Wp4H-kuAho8oPZblM9_PD9W7XVx6EkA')
-chat_id = os.environ.get('TELEGRAM_CHAT_ID', '294086745')
-events_json = os.environ.get('EVENTS', '[{"message": "Випити Animal Flex)", "timeUTC": "12:00"},{"message": "TEST", "timeUTC": "11:30"}]')
-daily_report = os.environ.get('DAILY_REPORT', '11:00')
-time_delta = os.environ.get('TIME_DELTA', '3')
-# local_timezone = os.environ.get('LOCAL_TIMEZONE', 'Europe/Kiev')  # Задання часового поясу за замовчуванням
 
 # Завантаження та парсинг подій
 events = json.loads(events_json)
@@ -35,29 +29,33 @@ async def send_message(message, disable_notification=False):
 def create_send_message_task(message, disable_notification=False):
     return asyncio.create_task(send_message(message, disable_notification=disable_notification))
 
+def create_job(type:str, at:str, message:str, disable_notification:bool=False) -> NoReturn:
+    job = schedule.every()
+    if type == 'hourly':
+        job = job.hour
+    elif type == 'daily':
+        job = job.day
+    elif type == 'weekly':
+        job = job.week
+
+    job.at(at).do(create_send_message_task, message, disable_notification)
+
 
 # Налаштування розкладу нагадувань
 def schedule_tasks():
     for event in events:
         logging.info(f"Schedule message: {event['message']} at {event['timeUTC']}")
-        schedule.every().day.at(event['timeUTC']).do(create_send_message_task, event['message'])
-    # schedule.every().hour.at(':50').do(create_send_message_task, 'Hourly Report\n' + get_scheduled_tasks(), disable_notification=True)
-    schedule.every().day.at(daily_report).do(create_send_message_task, 'Daily Report\n' + get_scheduled_tasks(),
-                                       disable_notification=True)
+        create_job(event['type'], event['at'], event['message'])
+    create_job(daily_report, daily_report, 'Daily Report\n' + get_scheduled_tasks(), True)
 
 
 def get_scheduled_tasks() -> str:
     message = '>Events processed: \n> \n'
     for event in events:
         hours, minutes = event['timeUTC'].split(':')
-        # local_time = convert_time_to_local(event['time'], tz)
         message += f'>`time: {int(hours) + int(time_delta)}:{minutes} \(UTC: {event['timeUTC']}\) \- {event['message']}`\n'
     hours, minutes = daily_report.split(':')
     message += f'>`time: {int(hours) + int(time_delta)}:{minutes} \(UTC: {daily_report}\) \- Daily report`\n'
-
-    # message += '> joblist:\n'
-    # for job in schedule.get_jobs():
-    #     message += f'> {str(job.next_run.strftime('%H:%M:%S'))}\n'
     return message
 
 
@@ -78,9 +76,6 @@ async def scheduler():
             # The user has removed or blocked the bot.
             update_id += 1
         await asyncio.sleep(1)
-    # async with Bot(bot_token) as bot_listener:
-    #     # get the first pending update_id, this is so we can skip over it in case
-    #     # we get a "Forbidden" exception.
 
 
 
