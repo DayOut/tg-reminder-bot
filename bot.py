@@ -42,6 +42,8 @@ def schedule_tasks():
         logging.info(f"Schedule message: {event['message']} at {event['timeUTC']}")
         schedule.every().day.at(event['timeUTC']).do(create_send_message_task, event['message'])
     schedule.every().hour.at(':50').do(create_send_message_task, 'Hourly Report\n' + get_scheduled_tasks(), disable_notification=True)
+    schedule.every().day.at(daily_report).do(create_send_message_task, 'Hourly Report\n' + get_scheduled_tasks(),
+                                       disable_notification=True)
 
 
 def get_scheduled_tasks() -> str:
