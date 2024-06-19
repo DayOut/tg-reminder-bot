@@ -36,8 +36,6 @@ def schedule_tasks():
         logging.info(f"Schedule message: {event['message']} at {event['timeUTC']}")
         message = helpers.escape_markdown(event['message'], version=2)
         schedule.every().day.at(event['timeUTC']).do(create_send_message_task, message)
-        schedule.every().minute.at(":10").do(create_send_message_task, message)
-    # schedule.every().hour.at(':50').do(create_send_message_task, 'Hourly Report\n' + get_scheduled_tasks(), disable_notification=True)
     schedule.every().day.at(daily_report).do(create_send_message_task, 'Daily Report\n' + get_scheduled_tasks(),
                                        disable_notification=True)
 
