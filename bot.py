@@ -2,7 +2,7 @@ import json
 import logging
 import asyncio
 from datetime import datetime, time
-from telegram import Bot, Update
+from telegram import Bot, Update, helpers
 from telegram.error import Forbidden, NetworkError
 import schedule
 from variables import bot_token, chat_id, events_json, daily_report, time_delta
@@ -34,7 +34,9 @@ def create_send_message_task(message, disable_notification=False):
 def schedule_tasks():
     for event in events:
         logging.info(f"Schedule message: {event['message']} at {event['timeUTC']}")
-        schedule.every().day.at(event['timeUTC']).do(create_send_message_task, event['message'])
+        message = helpers.escape_markdown(event['message'], version=2)
+        schedule.every().day.at(event['timeUTC']).do(create_send_message_task, message)
+        schedule.every().minute.at(":10").do(create_send_message_task, message)
     # schedule.every().hour.at(':50').do(create_send_message_task, 'Hourly Report\n' + get_scheduled_tasks(), disable_notification=True)
     schedule.every().day.at(daily_report).do(create_send_message_task, 'Daily Report\n' + get_scheduled_tasks(),
                                        disable_notification=True)
