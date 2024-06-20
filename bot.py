@@ -5,7 +5,7 @@ from datetime import datetime, time
 from telegram import Bot, Update, helpers
 from telegram.error import Forbidden, NetworkError
 import schedule
-from variables import bot_token, chat_id, events_json, daily_report, time_delta
+from variables import bot_token, chat_id, events_json, daily_report, time_delta, is_start_message
 import os
 from typing import NoReturn
 
@@ -77,7 +77,8 @@ async def main():
     start_message = f"Бот онлайн\! \nПоточний час: `{current_time}`"
     schedule_tasks()
     start_message += "\n\n" + get_scheduled_tasks()
-    await send_message(start_message, disable_notification=True)
+    if eval(is_start_message):
+        await send_message(start_message, disable_notification=True)
     await scheduler()
 
 
